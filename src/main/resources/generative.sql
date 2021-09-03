@@ -4,34 +4,31 @@ CREATE SEQUENCE country_id_sequence_Item INCREMENT 1 MINVALUE 0;
 CREATE TABLE Groups
 (
     id              bigint PRIMARY KEY DEFAULT nextval('country_id_sequence_Group'),
-    name            varchar NOT NULL,
-    parent_group_id bigint,
-    items_id        bigint
+    name            varchar                       NOT NULL,
+    parent_group_id bigint REFERENCES Groups (id) null
 );
 
 CREATE TABLE Item
 (
     id         bigint PRIMARY KEY DEFAULT nextval('country_id_sequence_Item'),
-    name       varchar                       NOT NULL,
-    base_price bigint                        NOT NULL,
-    group_id   bigint REFERENCES Groups (id) NULL -- one two many relation
+    name       varchar NOT NULL,
+    base_price bigint  NOT NULL,
+    group_id   bigint REFERENCES Groups (id) -- one two many relation
 );
 
-SELECT *
-FROM Groups
-         RIGHT JOIN Item I on Groups.id = I.group_id;
+ALTER TABLE groups
+    ADD COLUMN item_id varchar;
 
-SELECT group_id, COUNT(group_id) AS COUNT_ITEM
-FROM Item
-         LEFT JOIN Groups G on Item.group_id = G.id
-GROUP BY group_id;
+ALTER TABLE Groups
+DROP COLUMN item_id;
 
+ALTER TABLE Item
+    ALTER COLUMN group_id SET NOT NULL;
 
+ALTER TABLE Item RENAME TO Items;
+ALTER TABLE Items RENAME COLUMN base_price TO price_base;
 
-SELECT *
-FROM Groups;
-SELECT *
-FROM Item;
+TRUNCATE TABLE item;
 
 DROP TABLE Item;
 DROP SEQUENCE country_id_sequence_Item;
