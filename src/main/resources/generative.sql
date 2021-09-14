@@ -1,5 +1,5 @@
-CREATE SEQUENCE country_id_sequence_Group INCREMENT 1 MINVALUE 0;
-CREATE SEQUENCE country_id_sequence_Item INCREMENT 1 MINVALUE 0;
+CREATE SEQUENCE country_id_sequence_Group INCREMENT 1 MINVALUE 1;
+CREATE SEQUENCE country_id_sequence_Item INCREMENT 1 MINVALUE 1;
 
 CREATE TABLE Groups
 (

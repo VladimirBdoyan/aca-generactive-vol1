@@ -4,6 +4,7 @@ import com.example.acageneractivweb.model.GenerativeItem;
 import com.example.acageneractivweb.model.Item;
 import com.example.acageneractivweb.model.StockItem;
 import com.example.acageneractivweb.repository.ItemRepository;
+import com.example.acageneractivweb.repository.JdbcItemRepository;
 import com.example.acageneractivweb.util.ErrorEntity;
 import com.example.acageneractivweb.util.constant.HttpConstants;
 import com.example.acageneractivweb.util.idgenerator.IdGenerator;
@@ -19,6 +20,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @WebServlet(name = "ItemServlet", value = "/item-servlet/*")
@@ -31,13 +35,29 @@ public class ItemServlet extends HttpServlet {
 
     // ObjectMapper parse Java objects to JSON and vise a versa.
     private final ObjectMapper objectMapper = new ObjectMapper();
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        List<Item> items = new ArrayList<>();
+        try (Connection conn = JdbcItemRepository.generactiveJdbcConnection()) {
+            stmt = conn.prepareStatement("SELECT * FROM  item");
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                int base_price = rs.getInt("base_price");
+                int group_id = rs.getInt("group_id");
+                Item item = new StockItem(id, base_price, name);
+                items.add(item);
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
 
         resp.setContentType(HttpConstants.ContentType.APPLICATION_JSON);
-
-        String response = objectMapper.writeValueAsString(itemRepository.getItems());
+        String response = objectMapper.writeValueAsString(items);
         PrintWriter writer = resp.getWriter();
         writer.write(response);
     }
@@ -76,8 +96,8 @@ public class ItemServlet extends HttpServlet {
             switch (type) {
                 case STOCK:
                     item = objectMapper.readValue(body, StockItem.class);
-                    item.setId(IdGenerator.getNext(Type.ITEM));
-                    itemRepository.addItem(item);
+                    long id = JdbcItemRepository.insert(item,ItemType.STOCK.getValue());
+                    item.setId(id);
                     resp.getWriter().write(objectMapper.writeValueAsString(item));
                     break;
                 case GENERATIVE:

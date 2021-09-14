@@ -9,7 +9,7 @@ public class StockItem extends Item {
     }
 
     @Override
-    public void setId(int id) {
+    public void setId(long id) {
         super.setId(id);
     }
 

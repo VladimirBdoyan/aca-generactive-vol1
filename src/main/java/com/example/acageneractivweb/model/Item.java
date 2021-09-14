@@ -1,14 +1,17 @@
 package com.example.acageneractivweb.model;
 
+import java.util.Objects;
+
 public abstract class Item {
-    private int id;
+    private long id;
     private int basePrice;
     private String name;
     private String imageUrl;
     private Group group;
+    private  int group_id;
 
     public Item(){
-        
+
     }
 
     public Item(int id, int basePrice, String name) {
@@ -17,11 +20,11 @@ public abstract class Item {
         this.name = name;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -45,14 +48,40 @@ public abstract class Item {
         this.imageUrl = imageUrl;
     }
 
-    void setGroup(Group group) {
+    public void setGroup(Group group) {
         this.group = group;
     }
+
+    public Group getGroup() {
+        return group;
+    }
+
+    public void setGroup_id(int group_id) {
+        this.group_id = group_id;
+    }
+
+    public int getGroup_id() {
+        return group_id;
+    }
+
 
     public abstract int calculatePrice(Configuration configuration);
 
     public void print() {
         System.out.printf("ITEM(%s) - id: {%d} {%s} {%d}%n",
                 this.getClass().getSimpleName(), id, name, basePrice);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Item item = (Item) o;
+        return Objects.equals(name, item.name) && Objects.equals(imageUrl, item.imageUrl);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, imageUrl);
     }
 }
